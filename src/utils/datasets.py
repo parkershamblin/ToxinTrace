@@ -1,6 +1,7 @@
 """
 Utilities for loading datasets.
 """
+import os
 import copy
 import torch
 import logging
@@ -8,10 +9,12 @@ import logging
 from typing import List, Dict
 from itertools import chain
 from torch.utils.data import DataLoader
-from datasets import Dataset, load_dataset
+from datasets import Dataset, load_dataset, load_from_disk
 from transformers import AutoTokenizer
 
-TOKENIZED_OWT_PATH = "ztcoalson/openwebtext-gptneox-2048-chunks"
+# ToxinTrace: IFGUIDE_OWT_PATH may point to a local `save_to_disk` copy (e.g., a single shard
+# for small-scale runs, or a different tokenized corpus for the newer-corpus extension).
+TOKENIZED_OWT_PATH = os.environ.get("IFGUIDE_OWT_PATH", "ztcoalson/openwebtext-gptneox-2048-chunks")
 REAL_TOXICITY_PROMPTS_PATH = "../data/RTP/rtp.json"     # RTP with toxicity classifications from Detoxify instead of Perspective API
 ATTAQ_PATH = "ibm-research/AttaQ"
 BOLD_PATH = "AmazonScience/bold"
@@ -49,7 +52,10 @@ def get_tokenized_openwebtext(
             " If necessary, modify 'get_tokenized_openwebtext' in 'utils/datasets.py' to load a different tokenized dataset using the aforementioned function."
         )
 
-    dset = load_dataset(TOKENIZED_OWT_PATH, split="train")
+    if os.path.isdir(TOKENIZED_OWT_PATH):
+        dset = load_from_disk(TOKENIZED_OWT_PATH)
+    else:
+        dset = load_dataset(TOKENIZED_OWT_PATH, split="train")
 
     if indices is not None:
         dset = dset.select(indices)

@@ -53,6 +53,12 @@ def parse_args():
         help="Identifier for the save path."
     )
     parser.add_argument(
+        "--output_root",
+        type=str,
+        default="../data/toxic_token_masks",
+        help="Root directory for saved toxic token masks.",
+    )
+    parser.add_argument(
         "--inspection_idx",
         type=int,
         default=0,
@@ -201,7 +207,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(config['tokenizer']['path'], use_fast=True, trust_remote_code=True)
 
     save_path = (
-        f"../data/toxic_token_masks/"
+        f"{args.output_root}/"
         f"{args.factor_strategy}_{args.query_dataset}_{args.model_name}"
         f"{'_' + args.save_id if args.save_id else ''}/"
         f"mask_toks={round(args.max_tokens / 1e6, 1)}m"

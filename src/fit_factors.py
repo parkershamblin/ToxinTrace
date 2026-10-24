@@ -148,7 +148,7 @@ def main():
         output_dir=args.output_dir,
     )
     # Configure parameters for DataLoader.
-    dataloader_kwargs = DataLoaderKwargs(num_workers=4, collate_fn=default_data_collator, pin_memory=True)
+    dataloader_kwargs = DataLoaderKwargs(num_workers=int(os.environ.get("IFGUIDE_NUM_WORKERS", 4)), collate_fn=default_data_collator, pin_memory=True)
     analyzer.set_dataloader_kwargs(dataloader_kwargs)
 
     # Compute influence factors

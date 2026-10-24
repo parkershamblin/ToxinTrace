@@ -136,6 +136,26 @@ def parse_args():
         help="Whether to compile the model using torch.compile.",
     )
 
+    # ToxinTrace: hardware / small-scale overrides
+    parser.add_argument(
+        "--no_bf16",
+        action="store_true",
+        default=False,
+        help="Disable bf16 mixed precision (e.g., for CPU-only runs).",
+    )
+    parser.add_argument(
+        "--num_proc",
+        type=int,
+        default=4,
+        help="Number of processes for dataset mapping.",
+    )
+    parser.add_argument(
+        "--save_steps",
+        type=int,
+        default=None,
+        help="Checkpoint (and evaluation) interval; defaults to the original setting.",
+    )
+
     # IF-Guide
     parser.add_argument(
         "--toxic_token_mask_path",
@@ -199,13 +219,13 @@ if __name__ == "__main__":
             lambda example, idx: {"toxic_token_mask": toxic_token_mask[idx].tolist()},
             with_indices=True,
             desc="Attaching toxic token masks",
-            num_proc=4
+            num_proc=args.num_proc if args.num_proc > 1 else None
         )
         eval_dataset = eval_dataset.map(
             lambda example, idx: {"toxic_token_mask": [False] * len(example["input_ids"])},
             with_indices=True,
             desc="Attaching toxic token masks",
-            num_proc=4
+            num_proc=args.num_proc if args.num_proc > 1 else None
         )
 
     logging.info(f"Finetuning dataset size: {len(train_dataset)} ({len(train_dataset) * config['model']['block_size'] / 1e9:.2f} billion tokens)")
@@ -232,9 +252,9 @@ if __name__ == "__main__":
         adam_beta2=0.95,
         adam_epsilon=1e-08,
         remove_unused_columns=False,
-        bf16=True,
+        bf16=not args.no_bf16,
         save_strategy="steps",
-        save_steps=250,
+        save_steps=args.save_steps or 250,
         ddp_find_unused_parameters=False,
     )
     
@@ -258,3 +278,6 @@ if __name__ == "__main__":
     # trainer.can_return_loss = True  # uncomment if using LoRA: https://github.com/huggingface/peft/issues/1881
 
     trainer.train(resume_from_checkpoint=args.resume_path)
+
+    # ToxinTrace: always save the final (or best, if loaded) model for downstream steps
+    trainer.save_model(os.path.join(args.save_dir, "final"))

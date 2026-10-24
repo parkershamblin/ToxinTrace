@@ -93,6 +93,9 @@ def construct_hf_model(
             trust_remote_code=True,
         )
         model_config.vocab_size = registry_config['tokenizer']['vocab_size']
+        # ToxinTrace: apply architecture overrides from the registry (e.g., context length, depth)
+        for key, value in registry_config['model'].get('config_overrides', {}).items():
+            setattr(model_config, key, value)
         model = AutoModelForCausalLM.from_config(
             config=model_config,
             trust_remote_code=True,
