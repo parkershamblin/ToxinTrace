@@ -13,6 +13,6 @@ python run_toxicity_eval.py \
     --checkpoint_dir $ckpt_dir \
     --dataset $dataset \
     --batch_size 32 \
-    --save_dir $save_dir \
+    --save_dir $save_id \
     --decoding_defense $defense \
     --save_outputs

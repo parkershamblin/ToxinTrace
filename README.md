@@ -230,9 +230,10 @@ We find that our method is composable with the decoding-time defense [*Reward Au
 
 ```bash
 cd utils/rad/reward_modeling
-gdown https://storage.googleapis.com/rad_release/saved_models.zip
-unzip saved_models.zip && rm saved_models.zip && rm -rf saved_models/gpt2_sentiment
+python -c "from huggingface_hub import hf_hub_download; hf_hub_download('hk/rad_rms', 'gpt2_toxicity/pytorch_model.bin', local_dir='saved_models')"
 ```
+
+(ToxinTrace note: the original `storage.googleapis.com/rad_release` bucket no longer exists; the RAD authors now host the reward models on the Hugging Face Hub at [hk/rad_rms](https://huggingface.co/hk/rad_rms).)
 
 Credit for the RAD implementation we use belongs entirely to the authors of the original work. Thank you!
 
