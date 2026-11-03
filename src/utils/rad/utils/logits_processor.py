@@ -106,7 +106,26 @@ class RewardAugmentedLogitsProcessor(LogitsProcessor):
                     1. use dict to find which token is chosen in last step
                     2. select that pkv and broadcast, select that attn_mask and broadcast
                 '''
-                for i, (input_ids_i, input_ids_to_topk_idx_dict_i), in enumerate(zip(input_ids, self._previous_input_ids_to_topk_idx)):
+                if self._num_gpus == 1:
+                    # ToxinTrace: single-GPU batched form of the per-row loop below. Every row's block of
+                    # topk candidate rows becomes a copy of the candidate that was actually chosen, done as
+                    # one gather per cache tensor instead of 2 x n_layers small copies and a GPU sync per row.
+                    source_rows = list(range(scores.shape[0] * self._topk))
+                    for i, (last_token, input_ids_to_topk_idx_dict_i) in enumerate(zip(input_ids[:, -1].tolist(), self._previous_input_ids_to_topk_idx)):
+                        # skip if eos is being generated
+                        if last_token == self._lm_tokenizer.eos_token_id:
+                            last_selected_topk_indices.append(-1)
+                            continue
+                        last_selected_topk_idx = input_ids_to_topk_idx_dict_i[last_token]
+                        last_selected_topk_indices.append(last_selected_topk_idx)
+                        source_rows[i*self._topk:(i+1)*self._topk] = [i*self._topk + last_selected_topk_idx] * self._topk
+                    source_rows = torch.tensor(source_rows, device=self._attention_mask[0].device)
+                    self._attention_mask[0].copy_(self._attention_mask[0].index_select(0, source_rows))
+                    for layer_kv in self._past_key_values[0]:
+                        for e in layer_kv:
+                            e.copy_(e.index_select(0, source_rows))
+                else:
+                  for i, (input_ids_i, input_ids_to_topk_idx_dict_i), in enumerate(zip(input_ids, self._previous_input_ids_to_topk_idx)):
                     # skip if eos is being generated
                     if input_ids_i[-1]==self._lm_tokenizer.eos_token_id:
                         last_selected_topk_indices.append(-1)
@@ -154,11 +173,11 @@ class RewardAugmentedLogitsProcessor(LogitsProcessor):
                             for e, e_selected in zip(layer_kv, layer_kv_selected):
                                 e[start_idx:end_idx+1, :, :, :] = e_selected[selected_token_idx, :, :, :].unsqueeze(0).repeat(
                                     end_idx-start_idx+1, 1, 1, 1)
-                    
+
             # get candidate sequences reward
             batch_size = scores.shape[0]
             ids = topk_ids.reshape((batch_size*self._topk, 1))
-            candidate_tokens = self._lm_tokenizer.batch_decode(ids, skip_special_tokens=True)
+            candidate_tokens = self._lm_tokenizer.batch_decode(ids.tolist(), skip_special_tokens=True)   # ToxinTrace: one host copy, not one per row
 
             max_candidate_length = self._rm_tokenizer.batch_encode_plus(
                 candidate_tokens,
@@ -185,15 +204,16 @@ class RewardAugmentedLogitsProcessor(LogitsProcessor):
                 if self._step!=0:
                     self._data_container['selected_indices'][cur_row-batch_size:cur_row, self._step-1] = np.array(last_selected_topk_indices)     # (rows, )
 
-            for score, id, ts in zip(scores, topk_ids, reward_scores):
-                score[id] = self.apply_function(score[id], ts)
-                inverse_id = torch.tensor(np.setdiff1d(range(len(score.cpu().numpy())), id.cpu().numpy()), device='cuda')
-                score[inverse_id] = -float("Inf")  # set all other scores to -inf
-                
+            # ToxinTrace: batched form of the original per-row loop (reward-adjust the top-k logits, set all
+            # other scores to -inf). Same values, without a CPU copy + setdiff over the vocabulary per row.
+            adjusted = self.apply_function(scores.gather(1, topk_ids), reward_scores)
+            scores.fill_(-float("Inf"))
+            scores.scatter_(1, topk_ids, adjusted)
+
             # update step, pkv, attn_mask, and dict
             self._step+=1
-            self._previous_input_ids_to_topk_idx = [
-                {ids.item():pos for pos,ids in enumerate(topk_ids_i)} for topk_ids_i in topk_ids
+            self._previous_input_ids_to_topk_idx = [   # ToxinTrace: .tolist() once instead of an .item() sync per entry
+                {ids:pos for pos,ids in enumerate(topk_ids_i)} for topk_ids_i in topk_ids.tolist()
             ]
             return scores
     
