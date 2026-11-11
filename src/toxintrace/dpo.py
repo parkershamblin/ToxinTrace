@@ -98,11 +98,18 @@ if __name__ == "__main__":
         tokenizer.pad_token = tokenizer.eos_token
 
     pairs = load_pairs(args.data_dir, args.max_pairs)
+    # Lee et al. tokenize prompts with truncation=True (right side), i.e. keep the FIRST max_prompt_length tokens;
+    # TRL's DPOTrainer would keep the LAST ones, so cut prompts here to match
+    long_prompts = 0
+    for p in pairs:
+        ids = tokenizer(p["prompt"]).input_ids
+        if len(ids) > args.max_prompt_length:
+            long_prompts += 1
+            p["prompt"] = tokenizer.decode(ids[:args.max_prompt_length])
     train_dataset = Dataset.from_list(pairs[:-args.valid_size])
     eval_dataset = Dataset.from_list(pairs[-args.valid_size:])
-    long_prompts = sum(len(tokenizer(p["prompt"]).input_ids) > args.max_prompt_length for p in pairs)
     logging.info(f"Train pairs: {len(train_dataset)}, held-out pairs: {len(eval_dataset)}, "
-                 f"prompts over {args.max_prompt_length} tokens: {long_prompts}")
+                 f"prompts cut to their first {args.max_prompt_length} tokens: {long_prompts}")
 
     # The registry loads bf16 weights; DPO runs in fp32 (tf32 matmuls), as Lee et al. did, so pass the dtype explicitly
     model = construct_hf_model(registry_config=config, checkpoint_dir=args.checkpoint_dir).to(torch.float32)
