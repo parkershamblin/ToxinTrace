@@ -58,6 +58,11 @@ def parse_args():
     parser.add_argument("--max_pairs", type=int, default=None, help="Use only the first N pairs (smoke tests).")
     parser.add_argument("--max_steps", type=int, default=-1, help="Stop after N steps (smoke tests).")
     parser.add_argument("--no_cuda", action="store_true", default=False)
+
+    # ToxinTrace: checkpoint sweep. On Pythia-160M the held-out DPO loss keeps falling while fluency collapses,
+    # so early stopping on it overtrains. With --sweep_save_steps N, save the model every N steps (all kept,
+    # weights only), turn off early stopping and best-model reloading, and pick a checkpoint afterwards.
+    parser.add_argument("--sweep_save_steps", type=int, default=None)
     return parser.parse_args()
 
 
@@ -120,6 +125,7 @@ if __name__ == "__main__":
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda step: min(1.0, (step + 1) / (args.warmup_steps + 1)))
 
     eval_steps = max(1, args.eval_every_examples // args.train_batch_size)
+    sweep = args.sweep_save_steps is not None
     training_args = DPOConfig(
         output_dir=args.save_dir,
         beta=args.beta,
@@ -137,9 +143,10 @@ if __name__ == "__main__":
         eval_strategy="steps",
         eval_steps=eval_steps,
         save_strategy="steps",
-        save_steps=eval_steps,
-        save_total_limit=2,
-        load_best_model_at_end=True,
+        save_steps=args.sweep_save_steps if sweep else eval_steps,
+        save_total_limit=None if sweep else 2,
+        save_only_model=sweep,
+        load_best_model_at_end=not sweep,
         metric_for_best_model="eval_loss",
         greater_is_better=False,
         logging_steps=eval_steps,
@@ -157,12 +164,13 @@ if __name__ == "__main__":
         eval_dataset=eval_dataset,
         processing_class=tokenizer,
         optimizers=(optimizer, scheduler),
-        callbacks=[
-            EarlyStoppingCallback(early_stopping_patience=args.patience),
-            LogToFileCallback(os.path.join(args.save_dir, "log.out")),
-        ],
+        callbacks=([] if sweep else [EarlyStoppingCallback(early_stopping_patience=args.patience)])
+                  + [LogToFileCallback(os.path.join(args.save_dir, "log.out"))],
     )
     trainer.train()
 
-    logging.info(f"Best checkpoint: {trainer.state.best_model_checkpoint} (eval_loss {trainer.state.best_metric})")
-    trainer.save_model(os.path.join(args.save_dir, "final"))
+    if sweep:
+        logging.info(f"Sweep done: checkpoints every {args.sweep_save_steps} steps in {args.save_dir} (no final/)")
+    else:
+        logging.info(f"Best checkpoint: {trainer.state.best_model_checkpoint} (eval_loss {trainer.state.best_metric})")
+        trainer.save_model(os.path.join(args.save_dir, "final"))
