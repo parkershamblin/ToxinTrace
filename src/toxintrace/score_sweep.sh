@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Usage: score_sweep.sh <name> <start_model_dir> <sweep_run_dir>
+# Usage: score_sweep.sh <name> <start_model_dir> <sweep_run_dir> [max_step]
+# Already-scored checkpoints are skipped, so it can be re-run to fill gaps.
 # Scores the start model (step 0) and every checkpoint-N of a DPO sweep, in step order:
 # OpenWebText perplexity + LAMBADA, and RTP toxicity on a 1,000-prompt subset (500 toxic + 500 non-toxic).
 # Stops early once perplexity is >15% above the start model for two checkpoints in a row.
@@ -18,12 +19,15 @@ score() {  # <tag> <ckpt>
   echo "=== $1 RTP exit $?"
 }
 ppl() { python -c "import json;print(json.load(open('$OUT/fluency/pythia-160m/$1/results.json'))['openwebtext']['perplexity'])"; }
-score ${NAME}_0000 $START
+MAX_STEP=${4:-999999}
+done_tag() { [ -f $OUT/fluency/pythia-160m/$1/results.json ] && [ -f $OUT/RTP/pythia-160m/$1/results.json ]; }
+done_tag ${NAME}_0000 || score ${NAME}_0000 $START
 BASE=$(ppl ${NAME}_0000); echo "=== $NAME start ppl $BASE $(date)"
 over=0
-for C in $(ls -d $RUN/checkpoint-* | sort -t- -k2 -n); do
-  S=$(printf "%04d" ${C##*-})
-  score ${NAME}_$S $C
+for N in $(for C in $RUN/checkpoint-*; do echo ${C##*-}; done | sort -n); do
+  [ $N -gt $MAX_STEP ] && break
+  S=$(printf "%04d" $N)
+  done_tag ${NAME}_$S || score ${NAME}_$S $RUN/checkpoint-$N
   P=$(ppl ${NAME}_$S); echo "=== $NAME step $S ppl $P $(date)"
   if python -c "import sys; sys.exit(0 if $P > 1.15*$BASE else 1)"; then over=$((over+1)); else over=0; fi
   if [ $over -ge 2 ]; then echo "=== $NAME stop: ppl >15% over start twice"; break; fi
