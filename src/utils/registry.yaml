@@ -114,7 +114,22 @@ models:
     kwargs:
       torch_dtype: bfloat16
 
+  # ToxinTrace (E1): pre-trained GPT-2 small, fine-tuned on OpenWebText with a mask transferred from Pythia
+  gpt2-pretrained:
+    path: gpt2
+    family: gpt2
+    tokenizer: gpt2-tok
+    block_size: 1024
+    pretrained: True
+    num_layers: 12
+    kwargs:
+      torch_dtype: bfloat16
+
 tokenizers:
   pythia-tok:
     path: EleutherAI/pythia-70m-deduped   # HuggingFace Hub path
     vocab_size: 50304                     # Vocab size of the tokenizer; used to potentially correct vocab sizes between models and tokenizers
+  # ToxinTrace (E1)
+  gpt2-tok:
+    path: gpt2
+    vocab_size: 50257

@@ -45,6 +45,18 @@ def get_tokenized_openwebtext(
     config: dict,
     indices: List[int] = None,
 ) -> Dataset:
+    # ToxinTrace (E1): IFGUIDE_TOKENIZED_PATH points to a `save_to_disk` dataset already tokenized for this
+    # model's tokenizer and block size (e.g. GPT-2 blocks from toxintrace/transfer_mask.py); use it as is
+    override = os.environ.get("IFGUIDE_TOKENIZED_PATH")
+    if override:
+        dset = load_from_disk(override)
+        if len(dset[0]["input_ids"]) != config['model']['block_size']:
+            raise ValueError(f"{override} has blocks of {len(dset[0]['input_ids'])} tokens, model expects {config['model']['block_size']}")
+        if indices is not None:
+            dset = dset.select(indices)
+        logging.info(f"Loaded pre-tokenized dataset from IFGUIDE_TOKENIZED_PATH={override}.")
+        return dset
+
     if config['tokenizer']['name'] != "pythia-tok" or config['model']['block_size'] != 2048:
         raise ValueError(
             "Only 'pythia-tok' tokenizer and 'block_size' = 2048 are supported for the OpenWebText subset we provide ('ztcoalson/openwebtext-gptneox-2048-chunks' on HuggingFace Hub)."
