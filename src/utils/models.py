@@ -54,7 +54,8 @@ def replace_conv1d_modules(model: nn.Module) -> int:
 
         if isinstance(module, Conv1D):
             changed_modules += 1
-            new_module = nn.Linear(in_features=module.weight.shape[0], out_features=module.weight.shape[1])
+            new_module = nn.Linear(in_features=module.weight.shape[0], out_features=module.weight.shape[1],
+                                   dtype=module.weight.dtype, device=module.weight.device)
             new_module.weight.data.copy_(module.weight.data.t())
             new_module.bias.data.copy_(module.bias.data)
             setattr(model, name, new_module)
