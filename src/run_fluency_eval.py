@@ -108,7 +108,14 @@ def evaluate_last_token_accuracy(loader: DataLoader, model: PreTrainedModel, dec
         if decoding_defense == 'none':
             input_ids = batch["input_ids"].to(model.device)
             attention_mask = batch["attention_mask"].to(model.device)
-            logits = model(input_ids, attention_mask=attention_mask).logits
+            # ToxinTrace: LAMBADA is left-padded to 512 tokens. Models with learned absolute position
+            # embeddings (GPT-2) need positions that start at 0 on the first real token; rotary models
+            # (Pythia) only see relative positions, so they are left exactly as before.
+            if model.config.model_type == "gpt2":
+                position_ids = (attention_mask.long().cumsum(-1) - 1).clamp(min=0)
+                logits = model(input_ids, attention_mask=attention_mask, position_ids=position_ids).logits
+            else:
+                logits = model(input_ids, attention_mask=attention_mask).logits
             last_token_logits = logits[:, -2, :]
         elif decoding_defense == 'rad':
             input_ids = batch["input_ids"][:, :-1].to(model.device)
