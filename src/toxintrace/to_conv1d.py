@@ -26,6 +26,9 @@ for k in list(sd):
     if k.endswith(suffixes):
         sd[k] = sd[k].t().contiguous()
         n += 1
+    # The swapped Linear layers trained in float32 while the rest was bfloat16; from_pretrained does not
+    # recast them, so store everything in bfloat16 (the registry dtype the evals run in).
+    sd[k] = sd[k].to(torch.bfloat16)
 save_file(sd, os.path.join(dst, "model.safetensors"), metadata={"format": "pt"})
 print(f"transposed {n} tensors -> {dst}")
 
@@ -34,9 +37,14 @@ from transformers import AutoModelForCausalLM
 sys.path.insert(0, os.path.expanduser("~/toxintrace/IF-Guide/src"))
 from utils.models import replace_conv1d_modules
 
-m = AutoModelForCausalLM.from_pretrained(dst, local_files_only=True)
+m = AutoModelForCausalLM.from_pretrained(dst, local_files_only=True, torch_dtype=torch.bfloat16)
 replace_conv1d_modules(m)
 msd = m.state_dict()
 orig = load_file(os.path.join(src, "model.safetensors"))
-bad = [k for k in orig if k in msd and not torch.equal(orig[k].to(msd[k].dtype), msd[k])]
+bad = [k for k in orig if k in msd and not torch.equal(orig[k].to(torch.bfloat16), msd[k])]
 print("mismatched tensors after round trip:", len(bad), bad[:3])
+import collections
+print("dtypes:", dict(collections.Counter(str(p.dtype) for p in m.parameters())))
+with torch.no_grad():
+    m.cuda().eval()(torch.tensor([[464, 3290]]).cuda())
+print("forward ok")
