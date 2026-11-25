@@ -42,7 +42,7 @@ Run the numbered scripts in order from `src/`. Each one prints its commands; set
 | `05_evaluate.sh` | R1 + R2: RTP, AttaQ, BOLD, implicit toxicity, fluency for 6 systems, then the tables | 16 h (RAD is 6 h per model) |
 | `06_bold_trailing_space.sh` | R2: BOLD without the trailing space of its prompts | 0.5 h |
 | `07_e1_gpt2_transfer.sh` | E1: mask moved to GPT-2's tokenizer, two fine-tunes, evaluation | 6 h |
-| `08_e2_fineweb.sh` | E2: FineWeb 2025 corpus (data only so far) | 0.3 h |
+| `08_e2_fineweb.sh` | E2: FineWeb 2025 corpus and its toxicity rate against OpenWebText (training runs not done) | 0.5 h |
 | `09_analysis.sh` | Bootstrap intervals, severity thresholds, BOLD first-word analysis, mask positions (CPU) | 5 min |
 
 ```bash
@@ -79,6 +79,10 @@ Checkpoints, the 1 GB mask and generated outputs are too large for GitHub and ar
 |---|---|---|
 | Undefended EMT / IF-Guide EMT | 0.285 / 0.186 (1.5x) | 0.218 / 0.042 (5.2x) |
 
+| E2, share of 256-token passages with toxicity above 0.5 | OpenWebText | FineWeb 2025 |
+|---|---|---|
+| Detoxify, 10,000 random chunks each | 1.70% | 0.56% |
+
 ## Our code
 
 | File in `src/toxintrace/` | Purpose |
@@ -89,7 +93,7 @@ Checkpoints, the 1 GB mask and generated outputs are too large for GitHub and ar
 | `dpo.py`, `score_sweep.sh` | DPO (TRL) with Lee et al.'s settings, checkpoint sweep and scoring |
 | `transfer_mask.py` | E1: moves a token mask between tokenizers through exact byte spans |
 | `to_conv1d.py` | E1: converts fine-tuned GPT-2 checkpoints to a standard layout and verifies them |
-| `make_fineweb_subset.py` | E2: FineWeb corpus in the same format as the OpenWebText chunks |
+| `make_fineweb_subset.py`, `compare_toxicity.py` | E2: FineWeb corpus in the same format as the OpenWebText chunks; Detoxify comparison |
 | `make_tables.py`, `analysis.py` | Tables, reduction factors, bootstrap intervals and diagnostics |
 | `experiments/` | The numbered scripts above |
 
