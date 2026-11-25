@@ -8,11 +8,13 @@ FIRST=${1:-0}
 TT_VENV=${TT_VENV:-$HOME/venvs/ifguide}; if [ -f "$TT_VENV/bin/activate" ]; then source "$TT_VENV/bin/activate"; fi
 export IFGUIDE_OWT_PATH=${IFGUIDE_OWT_PATH:-$HOME/toxintrace/data/owt_smoke}
 IDX=$HOME/toxintrace/data/smoke_indices
-S=$HOME/toxintrace/smoke
+S=${TT_SMOKE:-$HOME/toxintrace/smoke}
 LOG=$S/logs
 M=pythia-14m-smoke
 PORT=29511
 mkdir -p "$LOG"
+# evaluation results from an earlier smoke run would be reused (or rejected if their paths differ)
+if [ "$FIRST" -le 7 ]; then rm -rf "$S/results"; fi
 
 run() {
     local stage=$1 name=$2; shift 2
