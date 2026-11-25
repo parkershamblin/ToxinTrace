@@ -5,13 +5,14 @@
 # OpenWebText perplexity + LAMBADA, and RTP toxicity on a 1,000-prompt subset (500 toxic + 500 non-toxic).
 # Stops early once perplexity is >15% above the start model for two checkpoints in a row.
 NAME=$1; START=$2; RUN=$3
-source ~/venvs/ifguide/bin/activate
-export IFGUIDE_OWT_PATH=$HOME/toxintrace/data/owt_subset
-OUT=$HOME/toxintrace/results_sweep
-cd ~/toxintrace/IF-Guide/src
+TT_ROOT=${TT_ROOT:-$HOME/toxintrace}; TT_VENV=${TT_VENV:-$HOME/venvs/ifguide}
+if [ -f "$TT_VENV/bin/activate" ]; then source "$TT_VENV/bin/activate"; fi
+export IFGUIDE_OWT_PATH=${IFGUIDE_OWT_PATH:-$TT_ROOT/data/owt_subset}
+OUT=$TT_ROOT/results_sweep
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 score() {  # <tag> <ckpt>
   python run_fluency_eval.py --model_name pythia-160m --checkpoint_dir $2 \
-    --owt_test_indicies $HOME/toxintrace/data/owt_subset_indices/test_indices.npy --batch_size 16 \
+    --owt_test_indicies $TT_ROOT/data/owt_subset_indices/test_indices.npy --batch_size 16 \
     --output_dir $OUT --save_dir $1 --decoding_defense none > /dev/null 2>&1
   echo "=== $1 fluency exit $?"
   python run_toxicity_eval.py --model_name pythia-160m --checkpoint_dir $2 --dataset RTP --num_examples 1000 \

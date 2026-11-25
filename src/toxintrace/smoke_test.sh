@@ -5,7 +5,7 @@
 set -o pipefail
 FIRST=${1:-0}
 
-source ~/venvs/ifguide/bin/activate
+TT_VENV=${TT_VENV:-$HOME/venvs/ifguide}; if [ -f "$TT_VENV/bin/activate" ]; then source "$TT_VENV/bin/activate"; fi
 export IFGUIDE_OWT_PATH=${IFGUIDE_OWT_PATH:-$HOME/toxintrace/data/owt_smoke}
 IDX=$HOME/toxintrace/data/smoke_indices
 S=$HOME/toxintrace/smoke

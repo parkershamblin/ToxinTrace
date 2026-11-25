@@ -1,264 +1,109 @@
-## IF-Guide: Influence Function-Guided Detoxification of LLMs [[NeurIPS 2025]](https://neurips.cc/virtual/2025/poster/117716)
+# ToxinTrace: reproducing and extending IF-Guide
 
-This repository contains the code for IF-Guide, the LLM detoxification technique introduced in our paper:
+Course project for CAI 5307 (Natural Language Processing), University of South Florida, Fall 2026.
+Steven Abdalla, Pritkumar Pagda, Parker Shamblin.
 
-- [IF-Guide: Influence Function-Guided Detoxification of LLMs](https://arxiv.org/abs/2506.01790)
-- **[Zachary Coalson](https://zachcoalson.com)**, Juhan Bae, Nicholas Carlini, [Sanghyun Hong](https://sanghyun-hong.com/)
+We reproduce the Pythia-160M results of [IF-Guide: Influence Function-Guided Detoxification of LLMs](https://arxiv.org/abs/2506.01790)
+(Coalson, Bae, Carlini and Hong, NeurIPS 2025) on one RTX 4090, and test whether a toxic-token mask
+still works after it is moved to a model with a different tokenizer.
 
-&nbsp;
+This repository is the authors' code ([ztcoalson/IF-Guide](https://github.com/ztcoalson/IF-Guide)) plus our own scripts.
+**Everything we wrote is in [`src/toxintrace/`](src/toxintrace)**; our changes to the authors' files are listed below.
+The authors' README is kept as [`README_IFGUIDE.md`](README_IFGUIDE.md).
 
-----
+## Quick check (about 10 minutes)
 
-### TL;DR
-
-You can use our method to detoxify LLMs by identifying harmful training examples and then suppressing them during pre-training or fine-tuning!
-
-&nbsp;
-
-### Abstract
-
-We study how training data contributes to the emergence of toxic behaviors in large-language models. Most prior work on reducing model toxicity adopts reactive approaches, such as fine-tuning pre-trained (and potentially toxic) models to align them with human values. In contrast, we propose a *proactive* approach-IF-Guide-which leverages influence functions to identify harmful tokens within any training data and suppress their impact during training. To this end, we first show that standard influence functions are ineffective at discovering harmful training records. We then present a novel adaptation that measures token-level attributions from training data to model toxicity, along with techniques for selecting toxic training documents and a learning objective that can be integrated into both pre-training and fine-tuning. Moreover, IF-Guide does not rely on human-preference data, which is typically required by existing alignment methods. In evaluation, we demonstrate that IF-Guide substantially reduces both explicit and implicit toxicity-by up to 10× compared to uncensored models, and up to 3× compared to baseline alignment methods, e.g., DPO and RAD-across both pre-training and fine-tuning scenarios. IF-Guide is computationally efficient: a billion-parameter model is not necessary for computing influence scores; a million-parameter model-with 7.5× fewer parameters-can effectively serve as a proxy for identifying harmful data.
-
-&nbsp;
-
-----
-
-## Installation
-
-Create the conda environment (you can use any environment with `python>=3.10`) and install the necessary packages:
+This runs every stage of the pipeline on tiny models: data, training, EK-FAC, influence scores, the
+toxic-token mask, IF-Guide training, fine-tuning, all evaluations, and RAD. It stops at the first failure.
 
 ```bash
-conda create -n IF-Guide python=3.10
-conda activate IF-Guide
-pip install -r requirements.txt
+git clone https://github.com/parkershamblin/ToxinTrace.git && cd ToxinTrace
+python3.10 -m venv ~/venvs/ifguide && source ~/venvs/ifguide/bin/activate
+pip install --upgrade pip wheel
+pip install -r requirements-toxintrace.txt
+cd src && bash toxintrace/smoke_test.sh
 ```
 
-**Note:** We use the package [Kronfluence](https://github.com/pomonam/kronfluence) to compute influence scores with EK-FAC. We create a [custom implementation](https://github.com/ztcoalson/kronfluence) that supports the *differential influence* technique introduced in our paper (page 4, Eq. 6). Credit to all other components of the package goes to the original creators. Thank you!
+Needs Linux (or WSL2 Ubuntu 22.04), Python 3.10 and an NVIDIA GPU. The first run downloads a few GB of
+models and data; with those cached, all 13 stages took about 8 minutes on an RTX 4090. Logs go to
+`~/toxintrace/smoke/logs`. If it fails at stage N, fix the cause and resume with `bash toxintrace/smoke_test.sh N`.
 
-Next, navigate to the working directory:
+## Full experiments
+
+Run the numbered scripts in order from `src/`. Each one prints its commands; set `DRY_RUN=1` to only print them.
+
+| Script in `toxintrace/experiments/` | What it does | Time on an RTX 4090 |
+|---|---|---|
+| `00_data.sh` | The paper's 1B-token OpenWebText subset, compacted (33 GB download, 150 GB temporary disk) | 1 h |
+| `01_pretrain_base.sh` | R1: base Pythia-160M from scratch | 15 h |
+| `02_influence_mask.sh` | R1: EK-FAC factors, differential token scores, 2% toxic-token mask | 15 h |
+| `03_pretrain_ifguide.sh` | R1: Pythia-160M from scratch with the IF-Guide loss | 15-20 h |
+| `04_dpo_sweep.sh` | DPO on both models, checkpoint sweep and scoring | 3-4 h |
+| `05_evaluate.sh` | R1 + R2: RTP, AttaQ, BOLD, implicit toxicity, fluency for 6 systems, then the tables | 16 h (RAD is 6 h per model) |
+| `06_bold_trailing_space.sh` | R2: BOLD without the trailing space of its prompts | 0.5 h |
+| `07_e1_gpt2_transfer.sh` | E1: mask moved to GPT-2's tokenizer, two fine-tunes, evaluation | 6 h |
+| `08_e2_fineweb.sh` | E2: FineWeb 2025 corpus (data only so far) | 0.3 h |
+| `09_analysis.sh` | Bootstrap intervals, severity thresholds, BOLD first-word analysis, mask positions (CPU) | 5 min |
 
 ```bash
 cd src
+bash toxintrace/experiments/00_data.sh
+bash toxintrace/experiments/01_pretrain_base.sh      # ... and so on
 ```
 
-&nbsp;
+Settings are in [`experiments/env.sh`](src/toxintrace/experiments/env.sh): `TT_ROOT` (data, models and results; default `~/toxintrace`) and
+`TT_VENV` (default `~/venvs/ifguide`). Run long jobs inside `tmux`.
 
-----
+**DPO preference pairs (manual download).** Get `toxicity_pairwise.zip` from the Google Drive folder linked in
+[ajyl/dpo_toxic](https://github.com/ajyl/dpo_toxic) (Lee et al., 2024) and unzip it so that the six `.jsonl` files are in
+`$TT_ROOT/data/dpo_toxic/toxicity_pairwise/`. Needed only for `04_dpo_sweep.sh` and the DPO rows of `05_evaluate.sh`.
 
-## Model Training/Fine-Tuning
+**RAD reward model.** The original download is gone; `smoke_test.sh` (stage 10) fetches the authors' copy from
+`hk/rad_rms` on Hugging Face, or see [`README_IFGUIDE.md`](README_IFGUIDE.md).
 
-To train a model, run:
+Checkpoints, the 1 GB mask and generated outputs are too large for GitHub and are not included. Summary results are in [`results_toxintrace/`](results_toxintrace).
 
-```bash
-./scripts/train.sh
-```
+## What to expect
 
-This calls `train.py`, which accepts the following key arguments:
+| Pythia-160M on RealToxicityPrompts | EMT | TP | Perplexity |
+|---|---|---|---|
+| Undefended, ours (paper) | 0.557 (0.557) | 0.558 (0.560) | 25.83 (25.84) |
+| IF-Guide, ours (paper) | 0.115 (0.101) | 0.066 (0.054) | 26.84 (26.77) |
 
-| Argument                   | Description                                                                 |
-|----------------------------|-----------------------------------------------------------------------------|
-| `--model_name`             | Name of the model to train. Must be registered in `utils/registry.yaml` with a corresponding tokenizer (see existing models for examples) |
-| `--save_id`                | Descriptor tag used for output directory naming.        |
-| `--toxic_token_mask_path`  | Path to a token mask (generated via IF-Guide). Use `None` for standard training. |
-| `--toxic_lambda`           | The strength of the penalty term used by our training objective. |
+| GPT-2, fine-tuned on 400M tokens (E1) | EMT | TP | Perplexity |
+|---|---|---|---|
+| Control | 0.567 | 0.571 | 20.92 |
+| Transferred mask | 0.308 | 0.271 | 21.01 |
 
+## Our code
 
-**Note:** All other arguments can be left at default values to reproduce our experimental setup. This applies to the following sections.
+| File in `src/toxintrace/` | Purpose |
+|---|---|
+| `make_smoke_data.py`, `smoke_test.sh` | Tiny data and the end-to-end check |
+| `make_owt_subset.py` | Compact, fingerprinted copy of the paper's training subset |
+| `benchmark.sh` | Measures training and scoring speed at the paper's settings |
+| `dpo.py`, `score_sweep.sh` | DPO (TRL) with Lee et al.'s settings, checkpoint sweep and scoring |
+| `transfer_mask.py` | E1: moves a token mask between tokenizers through exact byte spans |
+| `to_conv1d.py` | E1: converts fine-tuned GPT-2 checkpoints to a standard layout and verifies them |
+| `make_fineweb_subset.py` | E2: FineWeb corpus in the same format as the OpenWebText chunks |
+| `make_tables.py`, `analysis.py` | Tables, reduction factors, bootstrap intervals and diagnostics |
+| `experiments/` | The numbered scripts above |
 
-To fine-tune an existing model, run:
+Changes to the authors' files (`git diff main toxintrace`):
 
-```bash
-./scripts/finetune.sh
-```
+- `utils/datasets.py`: `IFGUIDE_OWT_PATH` (local data), `IFGUIDE_TOKENIZED_PATH` (pre-tokenized data for other tokenizers), `IFGUIDE_STRIP_BOLD` (strip BOLD's trailing space).
+- `utils/models.py`, `utils/registry.yaml`: new models, architecture overrides, and the Conv1D-to-Linear swap keeps its dtype.
+- `run_fluency_eval.py`: position IDs for left-padded LAMBADA on GPT-2 (Pythia's path is unchanged).
+- `utils/rad/utils/logits_processor.py`: RAD's per-row loops batched; completions were identical on test prompts.
+- `train.py`, `finetune.py`, `fit_factors.py`, `build_toxic_token_mask.py`, `scripts/run_toxicity_eval.sh`: command-line options and small fixes.
 
-This runs `finetune.py`, which uses the following additional arguments:
+## Troubleshooting
 
-| Argument                   | Description                                                                 |
-|----------------------------|-----------------------------------------------------------------------------|
-| `--checkpoint_dir` | Path to a saved model. If using a pre-trained model, set it to `None`. |
-| `--max_steps`      | Maximum steps to fine-tune for.        |
+- **Very slow under WSL2:** past 24 GB, the Windows driver spills GPU memory into system RAM instead of failing. Close other GPU programs, use `MICRO_BATCH=4` for training, and keep RAD at batch 32.
+- **WSL2 stops a background job:** keep one terminal window open while jobs run in `tmux`.
+- **`inf` or `nan` after the first step in your own scripts:** Pythia's configs default to float16. Pass `torch_dtype=torch.bfloat16`, as `utils/models.py` does.
+- **RAM:** building the mask peaks at about 15 GB; the E1 mask transfer at about 27 GB (it ran on swap).
 
-&nbsp;
+## Credit
 
-----
-
-## Running IF-Guide
-
-IF-Guide is composed of four steps: (1) computing the inverse Hessian approximation with [EK-FAC](https://arxiv.org/abs/2308.03296), (2) computing the token-wise *differential influence* scores over the toxic and non-toxic query data (page 4, Eq. 8), (3) selecting influential toxic tokens to suppress during training (page 23, Alg. 1), and (4) suppressing the toxic tokens with our penalty-based training objective (page 5, Eq. 9).
-
-&nbsp;
-
-### 1. Fit the Inverse Hessian Approximation Factors
-
-Run:
-
-```bash
-./scripts/fit_factors.sh
-```
-
-This calls `fit_factors.py` and takes the following primary arguments:
-
-| Argument                   | Description                                                                 |
-|----------------------------|-----------------------------------------------------------------------------|
-| `--model_name`         | Name of the model to fit factors on. |
-| `--checkpoint_dir`     | Path to the saved model. If using a pre-trained model, set it to `None`. |
-| `--train_indices_path` | Path to the train indices used to train the model (not necessary if using the entire dataset). Must match the exact indices and be in the same order. We provide the indices of our one-billion-token [OpenWebText](https://huggingface.co/datasets/Skylion007/openwebtext) subset and set their path as the default.|
-| `--output_dir`           | Path to save the Hessian approximation data. |
-
-&nbsp;
-
-### 2. Compute Token-Wise Scores
-
-Run:
-
-```bash
-./scripts/compute_scores.sh
-```
-
-This runs `compute_scores.py` with the following key arguments (in addition to most of the arguments used to compute factors):
-
-| Argument                   | Description                                                                 |
-|----------------------------|-----------------------------------------------------------------------------|
-| `--model_name`         | Name of the model to compute scores for. |
-| `--checkpoint_dir`     | Path to the saved model. If using a pre-trained model, set it to `None`. |
-| `--save_id`            | Tag appended to the end of the save directory for custom naming. |
-| `--save_dir`           | Directory to save scores in (within the original factors directory).
-| `--factors_path`       | Path to the directory containing the (inverse) Hessian factors fit in the previous step. |
-| `--query_dataset`      | The query dataset for constructing the query gradient. Currently, the only option is `RTP`. | 
-| `--toxic_query_indices_path` | Path to the indices from the query dataset pertaining to *toxic* demonstrations. We provide our toxic subset from RTP in `../data/RTP/query_indices/toxic_indices.npy`. | 
-| `--nontoxic_query_indices_path` | Path to indices for *non-toxic* queries. We provide our non-toxic subset from RTP in `../data/RTP/query_indices/nontoxic_indices.npy`. |
-
-&nbsp;
-
-### 3. Select Influential Toxic Tokens
-
-Run:
-
-```bash
-./scripts/build_toxic_token_mask.sh
-```
-
-This runs `build_toxic_token_mask.py`. It takes the following primary arguments:
-
-| Argument                   | Description                                                                 |
-|----------------------------|-----------------------------------------------------------------------------|
-| `--model_name`         | Name of the model to build the mask for. |
-| `--scores_path`     | Path to the scores computed in the prior step. |
-| `--window`            | The context window length. |
-| `--toxicity_threshold`           | The threshold for determining toxic tokens (as a percentile, e.g., 0.99).
-| `--max_tokens`       | The maximum number of toxic tokens to select. |
-| `--query_dataset`      | The query dataset for constructing the query gradient. Currently, the only option is `RTP`. | 
-| `--inspection_idx` | We automatically print out the suppressed tokens for a single training example in red. This argument specifies which example to print based on its ranking (e.g., 0 is the highest-ranked training example).  | 
-
-&nbsp;
-
-### 4. Suppressing Toxic Tokens During Training/Fine-Tuning
-
-After computing the toxic tokens mask for a particular model, you can specify the `--toxic_token_mask_path` and `--toxic_lambda` arguments in `./scripts/train.sh` (and `./scripts/finetune.sh`) to train/fine-tune models with IF-Guide.
-
-&nbsp;
-
-----
-
-## Evaluation
-
-We provide code for evaluating explicit toxicity (via [Detoxify](https://github.com/unitaryai/detoxify/tree/master)), implicit toxicity (via [ToxiGen-RoBERTa](https://huggingface.co/tomh/toxigen_roberta)), and fluency (measured on [LAMBADA](https://huggingface.co/datasets/EleutherAI/lambada_openai) and [OpenWebText](https://huggingface.co/datasets/Skylion007/openwebtext)).
-
-&nbsp;
-
-### Explicit Toxicity Evaluation
-
-Run:
-
-```bash
-./scripts/run_toxicity_eval.sh
-```
-
-This runs `run_toxicity_eval.py`, which has the following main arguments:
-
-| Argument                   | Description                                                                 |
-|----------------------------|-----------------------------------------------------------------------------|
-| `--model_name`         | Name of the model to evaluate. |
-| `--checkpoint_dir`     | Path to the saved model. If using a pre-trained model, set it to `None`. |
-| `--dataset`            | Dataset to evaluate on. Either `RTP`, `AttaQ`, or `BOLD`. |
-| `--save_dir`           | Directory to save the results in.
-| `--decoding_defense`       | Decoding-time defense to apply. `none` or `rad`. Does not apply to our OpenWebText evaluation. |
-| `--save_outputs`      | Whether to save the model's outputs. | 
-
-&nbsp;
-
-### Implicit Toxicity Evaluation
-
-Run: 
-
-```bash
-./scripts/run_implicit_toxicity_eval.sh
-```
-
-It requires the following arguments:
-
-| Argument                   | Description                                                                 |
-|----------------------------|-----------------------------------------------------------------------------|
-| `--outputs_file_path`         | The path to an output file from an explicit toxicity run. We re-evaluate the existing outputs to save time. This should be an `output.json` file generated during explicit evaluation. |
-| `--dataset`            | Dataset the outputs are from. Determines how the final outputs are formatted. |
-
-&nbsp;
-
-### Fluency Evaluation
-
-Run:
-
-```bash
-./scripts/run_fluency_eval.sh
-```
-
-It has the following primary arguments:
-
-| Argument                   | Description                                                                 |
-|----------------------------|-----------------------------------------------------------------------------|
-| `--model_name`         | Name of the model to evaluate. |
-| `--checkpoint_dir`     | Path to the saved model. If using a pre-trained model, set it to `None`. |
-| `--dataset`            | Dataset to evaluate on. Either `RTP`, `AttaQ`, or `BOLD`. |
-| `--save_dir`           | Directory to save the results in.
-| `--decoding_defense`       | Decoding-time defense to apply. `none` or `rad`. Does not apply to our OpenWebText evaluation. |
-
-&nbsp;
-
-### Testing with [RAD](https://github.com/r-three/RAD)
-
-We find that our method is composable with the decoding-time defense [*Reward Augmented Decoding (RAD)* [EMNLP 2023]](https://aclanthology.org/2023.emnlp-main.721/). To run IF-Guide with RAD (or test RAD independently), first download the reward model ([provided by the authors of the original work](https://github.com/r-three/RAD)) and place it in the expected directory:
-
-```bash
-cd utils/rad/reward_modeling
-python -c "from huggingface_hub import hf_hub_download; hf_hub_download('hk/rad_rms', 'gpt2_toxicity/pytorch_model.bin', local_dir='saved_models')"
-```
-
-(ToxinTrace note: the original `storage.googleapis.com/rad_release` bucket no longer exists; the RAD authors now host the reward models on the Hugging Face Hub at [hk/rad_rms](https://huggingface.co/hk/rad_rms).)
-
-Credit for the RAD implementation we use belongs entirely to the authors of the original work. Thank you!
-
-&nbsp;
-
-----
-
-## Cite Our Work
-
-Please cite our work if you find this source code helpful.
-
-```
-@inproceedings{coalson2025ifguide,
-  title={{IF}-Guide: Influence Function-Guided Detoxification of {LLM}s},
-  author={Coalson, Zachary and Bae, Juhan and Carlini, Nicholas and Hong, Sanghyun},
-  booktitle={The Thirty-ninth Annual Conference on Neural Information Processing Systems},
-  year={2025},
-  url={https://openreview.net/forum?id=V82wLePv0o}
-}
-```
-
-&nbsp;
-
-----
-
-&nbsp;
-
-Please contact Zachary Coalson (coalsonz@oregonstate.edu) for any questions and recommendations.
+The method and most of the pipeline are by Coalson et al.; please cite their paper. License: see [`LICENSE`](LICENSE).

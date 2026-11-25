@@ -1,0 +1,121 @@
+defense,result_name,metric,ours,paper
+None,baseline,rtp_emt,0.557198,0.557
+None,baseline,rtp_tp,0.5579,0.56
+None,baseline,tox_emt,0.756582,0.764
+None,baseline,tox_tp,0.789,0.801
+None,baseline,non_emt,0.357815,0.35
+None,baseline,non_tp,0.3268,0.319
+None,baseline,rtp_itp,0.5551,0.55
+None,baseline,ppl,25.8274,25.84
+None,baseline,acc,0.439506,0.45
+None,baseline,attaq_emt,0.47592,0.458
+None,baseline,attaq_tp,0.464337,0.45
+None,baseline,attaq_itp,0.577033,0.539
+None,baseline,bold_emt,0.285057,0.276
+None,baseline,bold_tp,0.229413,0.217
+None,baseline,bold_itp,0.192334,0.186
+DPO,dpo300_baseline,rtp_emt,0.232977,0.348
+DPO,dpo300_baseline,rtp_tp,0.2026,0.33
+DPO,dpo300_baseline,tox_emt,0.352132,0.517
+DPO,dpo300_baseline,tox_tp,0.3334,0.525
+DPO,dpo300_baseline,non_emt,0.113821,0.179
+DPO,dpo300_baseline,non_tp,0.0718,0.136
+DPO,dpo300_baseline,rtp_itp,0.2279,0.334
+DPO,dpo300_baseline,ppl,26.3461,26.47
+DPO,dpo300_baseline,acc,0.42037,0.474
+DPO,dpo300_baseline,attaq_emt,0.150126,0.262
+DPO,dpo300_baseline,attaq_tp,0.109843,0.233
+DPO,dpo300_baseline,attaq_itp,0.226106,0.381
+DPO,dpo300_baseline,bold_emt,0.058259,0.094
+DPO,dpo300_baseline,bold_tp,0.0261075,0.05
+DPO,dpo300_baseline,bold_itp,0.0293015,0.048
+RAD,baseline_rad,rtp_emt,0.117126,0.118
+RAD,baseline_rad,rtp_tp,0.0938,0.094
+RAD,baseline_rad,tox_emt,0.199923,0.202
+RAD,baseline_rad,tox_tp,0.1772,0.176
+RAD,baseline_rad,non_emt,0.034329,0.034
+RAD,baseline_rad,non_tp,0.0104,0.011
+RAD,baseline_rad,rtp_itp,0.2467,0.249
+RAD,baseline_rad,ppl,,
+RAD,baseline_rad,acc,0.444856,0.457
+RAD,baseline_rad,attaq_emt,0.0719,0.069
+RAD,baseline_rad,attaq_tp,0.0306705,0.029
+RAD,baseline_rad,attaq_itp,0.306705,0.278
+RAD,baseline_rad,bold_emt,0.030269,0.03
+RAD,baseline_rad,bold_tp,0.0105541,0.013
+RAD,baseline_rad,bold_itp,0.0434662,0.043
+IF-Guide,ifguide,rtp_emt,0.114538,0.101
+IF-Guide,ifguide,rtp_tp,0.0664,0.054
+IF-Guide,ifguide,tox_emt,0.160066,0.136
+IF-Guide,ifguide,tox_tp,0.1068,0.085
+IF-Guide,ifguide,non_emt,0.06901,0.067
+IF-Guide,ifguide,non_tp,0.026,0.024
+IF-Guide,ifguide,rtp_itp,0.2016,0.195
+IF-Guide,ifguide,ppl,26.8437,26.77
+IF-Guide,ifguide,acc,0.42963,0.433
+IF-Guide,ifguide,attaq_emt,0.136638,0.122
+IF-Guide,ifguide,attaq_tp,0.0741797,0.066
+IF-Guide,ifguide,attaq_itp,0.303138,0.291
+IF-Guide,ifguide,bold_emt,0.185692,0.114
+IF-Guide,ifguide,bold_tp,0.152201,0.076
+IF-Guide,ifguide,bold_itp,0.0820719,0.062
+IF-Guide + DPO,dpo400_ifguide,rtp_emt,0.0627801,0.077
+IF-Guide + DPO,dpo400_ifguide,rtp_tp,0.0261,0.035
+IF-Guide + DPO,dpo400_ifguide,tox_emt,0.0824277,0.101
+IF-Guide + DPO,dpo400_ifguide,tox_tp,0.0402,0.053
+IF-Guide + DPO,dpo400_ifguide,non_emt,0.0431325,0.053
+IF-Guide + DPO,dpo400_ifguide,non_tp,0.012,0.017
+IF-Guide + DPO,dpo400_ifguide,rtp_itp,0.1753,0.187
+IF-Guide + DPO,dpo400_ifguide,ppl,27.4292,27.27
+IF-Guide + DPO,dpo400_ifguide,acc,0.369136,0.408
+IF-Guide + DPO,dpo400_ifguide,attaq_emt,0.0811807,0.097
+IF-Guide + DPO,dpo400_ifguide,attaq_tp,0.0335235,0.053
+IF-Guide + DPO,dpo400_ifguide,attaq_itp,0.238944,0.277
+IF-Guide + DPO,dpo400_ifguide,bold_emt,0.145174,0.106
+IF-Guide + DPO,dpo400_ifguide,bold_tp,0.118872,0.073
+IF-Guide + DPO,dpo400_ifguide,bold_itp,0.0787391,0.067
+IF-Guide + RAD,ifguide_rad,rtp_emt,0.0364712,0.031
+IF-Guide + RAD,ifguide_rad,rtp_tp,0.0221,0.017
+IF-Guide + RAD,ifguide_rad,tox_emt,0.0571551,0.047
+IF-Guide + RAD,ifguide_rad,tox_tp,0.0406,0.03
+IF-Guide + RAD,ifguide_rad,non_emt,0.0157874,0.015
+IF-Guide + RAD,ifguide_rad,non_tp,0.0036,0.004
+IF-Guide + RAD,ifguide_rad,rtp_itp,0.1556,0.149
+IF-Guide + RAD,ifguide_rad,ppl,,
+IF-Guide + RAD,ifguide_rad,acc,0.433333,0.438
+IF-Guide + RAD,ifguide_rad,attaq_emt,0.0445088,0.039
+IF-Guide + RAD,ifguide_rad,attaq_tp,0.0128388,0.012
+IF-Guide + RAD,ifguide_rad,attaq_itp,0.253923,0.228
+IF-Guide + RAD,ifguide_rad,bold_emt,0.0281048,0.03
+IF-Guide + RAD,ifguide_rad,bold_tp,0.0163866,0.018
+IF-Guide + RAD,ifguide_rad,bold_itp,0.0218025,0.024
+"DPO, early stopping (overtrained)",dpo_baseline,rtp_emt,0.00405972,
+"DPO, early stopping (overtrained)",dpo_baseline,rtp_tp,0.0019,
+"DPO, early stopping (overtrained)",dpo_baseline,tox_emt,0.00560077,
+"DPO, early stopping (overtrained)",dpo_baseline,tox_tp,0.003,
+"DPO, early stopping (overtrained)",dpo_baseline,non_emt,0.00251867,
+"DPO, early stopping (overtrained)",dpo_baseline,non_tp,0.0008,
+"DPO, early stopping (overtrained)",dpo_baseline,rtp_itp,0.005,
+"DPO, early stopping (overtrained)",dpo_baseline,ppl,38.5679,
+"DPO, early stopping (overtrained)",dpo_baseline,acc,0.321399,
+"DPO, early stopping (overtrained)",dpo_baseline,attaq_emt,0.00176868,
+"DPO, early stopping (overtrained)",dpo_baseline,attaq_tp,0,
+"DPO, early stopping (overtrained)",dpo_baseline,attaq_itp,0.00499287,
+"DPO, early stopping (overtrained)",dpo_baseline,bold_emt,0.00154768,
+"DPO, early stopping (overtrained)",dpo_baseline,bold_tp,0,
+"DPO, early stopping (overtrained)",dpo_baseline,bold_itp,0.000833218,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,rtp_emt,0.00637143,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,rtp_tp,0.0034,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,tox_emt,0.00581138,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,tox_tp,0.0032,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,non_emt,0.00693148,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,non_tp,0.0036,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,rtp_itp,0.0059,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,ppl,42.1622,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,acc,0.199383,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,attaq_emt,0.0116428,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,attaq_tp,0.0021398,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,attaq_itp,0.010699,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,bold_emt,0.0198729,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,bold_tp,0.00847105,
+"IF-Guide + DPO, early stopping (overtrained)",dpo_ifguide,bold_itp,0.00819331,

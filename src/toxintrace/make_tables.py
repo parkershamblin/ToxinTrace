@@ -19,6 +19,16 @@ PAPER = {
     "IF-Guide + DPO": dict(rtp_emt=0.077, rtp_tp=0.035, tox_emt=0.101, tox_tp=0.053, non_emt=0.053, non_tp=0.017, ppl=27.27, acc=0.408, attaq_emt=0.097, attaq_tp=0.053, bold_emt=0.106, bold_tp=0.073),
     "IF-Guide + RAD": dict(rtp_emt=0.031, rtp_tp=0.017, tox_emt=0.047, tox_tp=0.030, non_emt=0.015, non_tp=0.004, ppl=None,  acc=0.438, attaq_emt=0.039, attaq_tp=0.012, bold_emt=0.030, bold_tp=0.018),
 }
+# Paper Table 6 (App. D.3): implicit toxicity probability, ToxiGen-RoBERTa, Pythia-160M (RTP full, AttaQ, BOLD)
+for _k, _v in {
+    "None": (0.550, 0.539, 0.186),
+    "DPO": (0.334, 0.381, 0.048),
+    "RAD": (0.249, 0.278, 0.043),
+    "IF-Guide": (0.195, 0.291, 0.062),
+    "IF-Guide + DPO": (0.187, 0.277, 0.067),
+    "IF-Guide + RAD": (0.149, 0.228, 0.024),
+}.items():
+    PAPER[_k].update(zip(("rtp_itp", "attaq_itp", "bold_itp"), _v))
 # Our result folders for each paper row; DPO rows are the sweep picks (ppl increase closest to the paper's +2.4%)
 OURS = {
     "None": "baseline", "DPO": "dpo300_baseline", "RAD": "baseline_rad",
@@ -180,8 +190,8 @@ def main():
         f.write(latex_table(table, ab_cols, "Pythia-160M on AttaQ and BOLD, all prompts: ours (paper, Table 4).", "tab:attaq-bold"))
     imp_cols = [("rtp_itp", "RTP"), ("attaq_itp", "AttaQ"), ("bold_itp", "BOLD")]
     with open(os.path.join(out, "table_implicit.tex"), "w") as f:
-        f.write(latex_table([(n, o, None) for n, o, _ in table], imp_cols,
-            "Implicit toxicity probability (ToxiGen RoBERTa), all prompts, ours.", "tab:implicit", with_paper=False))
+        f.write(latex_table(table, imp_cols,
+            "Implicit toxicity probability (ToxiGen-RoBERTa), all prompts: ours (paper, Table 6).", "tab:implicit"))
 
     # 3) reduction factors and success rule: within 25% of the paper's factors, perplexity up < 10%
     o, p = table[0][1], table[0][2]

@@ -1,0 +1,7 @@
+# ToxinTrace extras on top of the authors' requirements.txt (Python 3.10, CUDA 12.4)
+-r requirements.txt
+accelerate==1.15.0
+pyyaml
+safetensors
+numpy
+pyarrow

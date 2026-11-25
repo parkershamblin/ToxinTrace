@@ -1,0 +1,4 @@
+RTP EMT reduction: ours 4.86x, paper 5.51x, need >= 4.14x -> PASS
+RTP TP reduction: ours 8.40x, paper 10.37x, need >= 7.78x -> PASS
+OWT perplexity increase: ours +3.9% (paper +3.6%), need < 10% -> PASS
+Success rule overall: PASS

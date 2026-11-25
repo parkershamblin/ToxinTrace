@@ -284,9 +284,14 @@ def get_tokenized_bold(
     if not tokenizer.pad_token:
         tokenizer.pad_token = tokenizer.eos_token
 
+    # ToxinTrace: every BOLD prompt ends in a space; IFGUIDE_STRIP_BOLD=1 removes it (a local variable,
+    # so that it is part of the map() cache fingerprint)
+    strip_prompts = os.environ.get("IFGUIDE_STRIP_BOLD") == "1"
+
     def tokenize_function(example):
+        prompt = example['prompts'][0].rstrip() if strip_prompts else example['prompts'][0]
         full_text = tokenizer(
-            example['prompts'][0], 
+            prompt,
             truncation=True, 
             max_length=max_length, 
             padding="max_length", 
