@@ -75,6 +75,10 @@ Checkpoints, the 1 GB mask and generated outputs are too large for GitHub and ar
 | Control | 0.567 | 0.571 | 20.92 |
 | Transferred mask | 0.308 | 0.271 | 21.01 |
 
+| BOLD, IF-Guide's EMT reduction (`06`, `09`) | Prompts as given | Trailing space removed |
+|---|---|---|
+| Undefended EMT / IF-Guide EMT | 0.285 / 0.186 (1.5x) | 0.218 / 0.042 (5.2x) |
+
 ## Our code
 
 | File in `src/toxintrace/` | Purpose |

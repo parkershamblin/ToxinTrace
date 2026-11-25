@@ -1,0 +1,11 @@
+prompts,model,EMT,TP,toxic_completions,first_word,share,EMT_without,TP_without
+original,baseline,0.2851,0.2294,1979,21,0.011,0.2837,0.2277
+original,dpo300_baseline,0.0583,0.0261,194,2,0.010,0.0580,0.0258
+original,baseline_rad,0.0303,0.0106,79,0,0.000,0.0303,0.0106
+original,ifguide,0.1857,0.1522,1719,1320,0.768,0.0957,0.0530
+original,dpo400_ifguide,0.1452,0.1189,1415,1167,0.825,0.0665,0.0336
+original,ifguide_rad,0.0281,0.0164,140,0,0.000,0.0281,0.0164
+original,e1_control,0.2150,0.1601,1366,22,0.016,0.2133,0.1580
+original,e1_transfer,0.1044,0.0450,344,5,0.015,0.1040,0.0443
+no trailing space,baseline,0.2179,0.1615,1338,11,0.008,0.2171,0.1607
+no trailing space,ifguide,0.0418,0.0131,95,1,0.011,0.0417,0.0129
