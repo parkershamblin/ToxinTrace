@@ -21,6 +21,13 @@ import numpy as np
 KEY = re.compile(r"stupid|fuck|shit|idiot|crap|dumb|silly|\bass\b|damn|suck", re.I)
 PYTHIA = [("DPO", "dpo300_baseline"), ("RAD", "baseline_rad"), ("IF-Guide", "ifguide"),
           ("IF-Guide + DPO", "dpo400_ifguide"), ("IF-Guide + RAD", "ifguide_rad")]
+# (model, reference run, [(label, compared run)]): factors are reference / compared
+PAIRS = [("pythia-160m", "baseline", PYTHIA),
+         ("gpt2-pretrained", "e1_control", [("E1 mask", "e1_transfer")]),
+         ("pythia-410m-pretrained", "e2_control", [("E2 mask", "e2_ifguide"), ("E2 stock Pythia-410M", "e2_base")])]
+CURVE = {"pythia-160m": "base", "gpt2-pretrained": "gpt2_control", "pythia-410m-pretrained": "e2_control"}
+# BOLD without the trailing space: (model, reference, compared, label)
+STRIP = [("pythia-160m", "baseline", "ifguide", "IF-Guide"), ("pythia-410m-pretrained", "e2_control", "e2_ifguide", "E2 mask")]
 
 
 def load(root, dataset, model, name):
@@ -62,13 +69,13 @@ def main():
 
     rows, curves = [], {}
     for D in ["RTP", "AttaQ", "BOLD"]:
-        for model, base, others in [("pythia-160m", "baseline", PYTHIA), ("gpt2-pretrained", "e1_control", [("E1 mask", "e1_transfer")])]:
+        for model, base, others in PAIRS:
             o = load(args.results_dir, D, model, base)
             if o is None:
                 continue
             b = prompt_max(o)
             if D == "RTP":
-                curves["base" if model == "pythia-160m" else "gpt2_control"] = b
+                curves[CURVE[model]] = b
             for label, name in others:
                 o = load(args.results_dir, D, model, name)
                 if o is None:
@@ -78,12 +85,12 @@ def main():
                     curves[name] = a
                 (e, el, eh), (t, tl, th) = factor_ci(b, a, rng)
                 rows.append([D, label, f"{a.mean():.4f}", f"{(a > 0.5).mean():.4f}", f"{e:.2f}", f"{el:.2f}", f"{eh:.2f}", f"{t:.2f}", f"{tl:.2f}", f"{th:.2f}"])
-    for tag, root in [("BOLD (no trailing space)", args.strip_dir)]:
-        ob, oi = load(root, "BOLD", "pythia-160m", "baseline"), load(root, "BOLD", "pythia-160m", "ifguide")
+    for model, ref, name, label in STRIP:
+        ob, oi = load(args.strip_dir, "BOLD", model, ref), load(args.strip_dir, "BOLD", model, name)
         if ob and oi:
             b, a = prompt_max(ob), prompt_max(oi)
             (e, el, eh), (t, tl, th) = factor_ci(b, a, rng)
-            rows.append([tag, "IF-Guide", f"{a.mean():.4f}", f"{(a > 0.5).mean():.4f}", f"{e:.2f}", f"{el:.2f}", f"{eh:.2f}", f"{t:.2f}", f"{tl:.2f}", f"{th:.2f}"])
+            rows.append(["BOLD (no trailing space)", label, f"{a.mean():.4f}", f"{(a > 0.5).mean():.4f}", f"{e:.2f}", f"{el:.2f}", f"{eh:.2f}", f"{t:.2f}", f"{tl:.2f}", f"{th:.2f}"])
     write(os.path.join(args.out_dir, "factors.csv"),
           ["dataset", "model", "EMT", "TP", "EMT_x", "lo", "hi", "TP_x", "lo", "hi"], rows)
 
@@ -94,7 +101,7 @@ def main():
     first = lambda c: KEY.search(" ".join(c["completion"].split()[:1])) is not None
     rows = []
     for root, tag in [(args.results_dir, "original"), (args.strip_dir, "no trailing space")]:
-        for model, name in [("pythia-160m", "baseline")] + [("pythia-160m", n) for _, n in PYTHIA] + [("gpt2-pretrained", "e1_control"), ("gpt2-pretrained", "e1_transfer")]:
+        for model, name in [(m, n) for m, ref, others in PAIRS for n in [ref] + [o for _, o in others]]:
             o = load(root, "BOLD", model, name)
             if o is None:
                 continue

@@ -1,0 +1,25 @@
+metric,e2_base,e2_control,e2_ifguide,e2_control / e2_ifguide
+RTP EMT,0.6148,0.5646,0.1593,3.54x
+RTP TP,0.6239,0.5705,0.1193,4.78x
+RTP EMT (toxic prompts),0.8407,0.8068,0.2393,3.37x
+RTP TP (toxic prompts),0.8782,0.8438,0.2004,4.21x
+RTP EMT (non-toxic prompts),0.3890,0.3224,0.0793,4.06x
+RTP TP (non-toxic prompts),0.3696,0.2972,0.0382,7.78x
+AttaQ EMT,0.4482,0.3759,0.1423,2.64x
+AttaQ TP,0.4358,0.3581,0.0906,3.95x
+BOLD EMT,0.1690,0.1364,0.0453,3.01x
+BOLD TP,0.1189,0.0910,0.0151,6.01x
+BOLD EMT (no trailing space),0.1195,0.0931,0.0280,3.33x
+BOLD TP (no trailing space),0.0810,0.0562,0.0067,8.44x
+"Implicit TP, RTP",0.5931,0.5511,0.2160,2.55x
+"Implicit TP, AttaQ",0.4943,0.4108,0.2090,1.97x
+"Implicit TP, BOLD",0.0880,0.0729,0.0133,5.47x
+RTP obscene probability,0.3221,0.2737,0.0118,23.19x
+RTP threat probability,0.0980,0.0869,0.0194,4.48x
+RTP insult probability,0.3645,0.3059,0.0210,14.57x
+RTP identity_attack probability,0.1045,0.0966,0.0247,3.91x
+RTP sexual_explicit probability,0.2549,0.2376,0.0436,5.45x
+RTP completions above 0.5,0.0934,0.0823,0.0083,9.92x
+OWT perplexity,15.8063,16.6011,16.9181,+1.9%
+LAMBADA accuracy,0.6082,0.6492,0.6488,-0.000
+FineWeb perplexity (held-out chunks),18.8266,16.4700,16.6276,+1.0%

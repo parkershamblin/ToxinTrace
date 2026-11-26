@@ -1,0 +1,414 @@
+{
+  "openwebtext": {
+    "chunks": 488282,
+    "flagged_tokens": 19999998,
+    "flagged_share": 0.019999967280050258,
+    "chunks_with_a_flag": 288031,
+    "median_flags_in_flagged_chunks": 63.0,
+    "max_flags": 314,
+    "share_of_flags_in_first_64_positions": 0.19576626957662696,
+    "top_chunks": {
+      "n": 1000,
+      "passages_above_0.5": 0.388125,
+      "chunks_above_0.5": 0.882,
+      "mean": 0.38669798228668517
+    },
+    "random_chunks": {
+      "n": 10000,
+      "flagged_share": 0.02015048828125,
+      "flagged_share_in_toxic_passages": 0.07930261948529412,
+      "flagged_share_in_other_passages": 0.019127511444557477,
+      "share_of_flags_in_toxic_passages": 0.0669038145593944,
+      "toxic_passages_with_a_flag": 0.9286764705882353,
+      "other_passages_with_a_flag": 0.4419379450661241,
+      "share_of_flags_in_passages_below_0.1": 0.8161586887724689
+    }
+  },
+  "fineweb_2025": {
+    "chunks": 195313,
+    "flagged_tokens": 7999998,
+    "flagged_share": 0.01999994380014387,
+    "chunks_with_a_flag": 111802,
+    "median_flags_in_flagged_chunks": 62.0,
+    "max_flags": 469,
+    "share_of_flags_in_first_64_positions": 0.19871142467785616,
+    "top_chunks": {
+      "n": 1000,
+      "passages_above_0.5": 0.2345,
+      "chunks_above_0.5": 0.666,
+      "mean": 0.24490445143460238
+    },
+    "random_chunks": {
+      "n": 10000,
+      "flagged_share": 0.01988955078125,
+      "flagged_share_in_toxic_passages": 0.11473189317673378,
+      "flagged_share_in_other_passages": 0.019356641562857466,
+      "share_of_flags_in_toxic_passages": 0.03223121830028134,
+      "toxic_passages_with_a_flag": 0.9910514541387024,
+      "other_passages_with_a_flag": 0.4103050796324463,
+      "share_of_flags_in_passages_below_0.1": 0.9082383671545498
+    },
+    "documents_contiguous": true,
+    "documents": {
+      "with_a_flag": 299445,
+      "total": 532338,
+      "share_of_flags_in_top_1pct_documents": 0.21490455372613843,
+      "hosts_with_a_flag": 219676,
+      "share_of_flags_in_top_100_hosts": 0.04753188688297172
+    },
+    "top_hosts": [
+      {
+        "host": "gutenberg.org",
+        "flags": 20544,
+        "tokens": 481309,
+        "docs": 9
+      },
+      {
+        "host": "quechuaqinti.web.illinois.edu",
+        "flags": 16270,
+        "tokens": 329028,
+        "docs": 34
+      },
+      {
+        "host": "www.gutenberg.org",
+        "flags": 10876,
+        "tokens": 182327,
+        "docs": 5
+      },
+      {
+        "host": "podscripts.co",
+        "flags": 8628,
+        "tokens": 79133,
+        "docs": 7
+      },
+      {
+        "host": "aknt.knu.edu.ua",
+        "flags": 6877,
+        "tokens": 133324,
+        "docs": 34
+      },
+      {
+        "host": "m.fanfiction.net",
+        "flags": 6749,
+        "tokens": 98346,
+        "docs": 19
+      },
+      {
+        "host": "erotikliteratur.info",
+        "flags": 6718,
+        "tokens": 57361,
+        "docs": 1
+      },
+      {
+        "host": "asstr.info",
+        "flags": 6680,
+        "tokens": 56144,
+        "docs": 1
+      },
+      {
+        "host": "www.thedailybeast.com",
+        "flags": 6471,
+        "tokens": 84568,
+        "docs": 81
+      },
+      {
+        "host": "ephemeralthoughts.com",
+        "flags": 5842,
+        "tokens": 88381,
+        "docs": 1
+      },
+      {
+        "host": "hansard.parliament.uk",
+        "flags": 5760,
+        "tokens": 251510,
+        "docs": 42
+      },
+      {
+        "host": "hubpages.com",
+        "flags": 5610,
+        "tokens": 95901,
+        "docs": 52
+      },
+      {
+        "host": "www.wonkette.com",
+        "flags": 5598,
+        "tokens": 38934,
+        "docs": 36
+      },
+      {
+        "host": "www.latimes.com",
+        "flags": 5588,
+        "tokens": 124086,
+        "docs": 120
+      },
+      {
+        "host": "biglizards.net",
+        "flags": 5440,
+        "tokens": 80364,
+        "docs": 1
+      },
+      {
+        "host": "www.historyproject.org.uk",
+        "flags": 5202,
+        "tokens": 61375,
+        "docs": 1
+      },
+      {
+        "host": "roleplayplus.com",
+        "flags": 5058,
+        "tokens": 57026,
+        "docs": 1
+      },
+      {
+        "host": "time.com",
+        "flags": 4955,
+        "tokens": 86780,
+        "docs": 79
+      },
+      {
+        "host": "scienceblogs.com",
+        "flags": 4814,
+        "tokens": 72939,
+        "docs": 14
+      },
+      {
+        "host": "telegra.ph",
+        "flags": 4705,
+        "tokens": 62056,
+        "docs": 34
+      },
+      {
+        "host": "www.hrw.org",
+        "flags": 4471,
+        "tokens": 80615,
+        "docs": 22
+      },
+      {
+        "host": "publications.parliament.uk",
+        "flags": 4244,
+        "tokens": 235091,
+        "docs": 77
+      },
+      {
+        "host": "www.telegraph.co.uk",
+        "flags": 4236,
+        "tokens": 94716,
+        "docs": 125
+      },
+      {
+        "host": "www.dead.net",
+        "flags": 4221,
+        "tokens": 63924,
+        "docs": 17
+      },
+      {
+        "host": "www.salon.com",
+        "flags": 4186,
+        "tokens": 60272,
+        "docs": 49
+      }
+    ],
+    "top_documents": [
+      {
+        "url": "https://erotikliteratur.info/im-being-blackmailed_0-2.html",
+        "flags": 6718,
+        "tokens": 57361
+      },
+      {
+        "url": "https://asstr.info/the-sister-keeper/",
+        "flags": 6680,
+        "tokens": 56144
+      },
+      {
+        "url": "https://ephemeralthoughts.com/viewtopic.php?f=5&t=357&p=468&sid=92f959c3793da600753143c15eb470ca",
+        "flags": 5842,
+        "tokens": 88381
+      },
+      {
+        "url": "https://biglizards.net/blog/archives/2007/01.html",
+        "flags": 5440,
+        "tokens": 80364
+      },
+      {
+        "url": "http://www.historyproject.org.uk/interview/harry-fowler",
+        "flags": 5202,
+        "tokens": 61375
+      },
+      {
+        "url": "https://roleplayplus.com/topic/13-balance-the-realms-march-2023-sept-2023/",
+        "flags": 5058,
+        "tokens": 57026
+      },
+      {
+        "url": "https://www.gutenberg.org/files/32241/32241-h/32241-h.htm",
+        "flags": 5004,
+        "tokens": 82422
+      },
+      {
+        "url": "https://gutenberg.org/cache/epub/29085/pg29085-images.html",
+        "flags": 4680,
+        "tokens": 79090
+      },
+      {
+        "url": "https://www.gutenberg.org/files/14432/14432-h/14432-h.htm",
+        "flags": 4387,
+        "tokens": 69333
+      },
+      {
+        "url": "https://boosh.queertet.net/fanfiction/the-mighty-boosh/pea-or-the-rediscovery-of-howard-b-moon/2219/",
+        "flags": 4015,
+        "tokens": 30680
+      },
+      {
+        "url": "https://www.hrw.org/report/2003/09/08/injecting-reason/human-rights-and-hiv-prevention-injection-drug-users",
+        "flags": 3687,
+        "tokens": 47866
+      },
+      {
+        "url": "http://www.poorrichardsprintshop.com/pulp/Text/Read_Pulp.asp?n=801",
+        "flags": 3672,
+        "tokens": 79429
+      },
+      {
+        "url": "https://podscripts.co/podcasts/chart-music-the-top-of-the-pops-podcast/68-pt-3-1580-the-ken-of-the-eighventies",
+        "flags": 3616,
+        "tokens": 28287
+      },
+      {
+        "url": "https://gutenberg.org/cache/epub/39434/pg39434-images.html",
+        "flags": 3510,
+        "tokens": 68339
+      },
+      {
+        "url": "https://www.pcprincipals.com/1638862/episodes/15248103-navigating-poor-judgments-trans-acceptance-and-social-issues-insights-and-reflections",
+        "flags": 3284,
+        "tokens": 17951
+      },
+      {
+        "url": "https://gutenberg.org/cache/epub/33163/pg33163-images.html",
+        "flags": 3164,
+        "tokens": 66281
+      },
+      {
+        "url": "https://podscripts.co/podcasts/the-truth-shall-make-ye-fret/113-monstrous-regiment-pt-3-gender-is-a-fake-drug",
+        "flags": 2980,
+        "tokens": 27291
+      },
+      {
+        "url": "https://gutenberg.org/cache/epub/41671/pg41671-images.html",
+        "flags": 2956,
+        "tokens": 61031
+      },
+      {
+        "url": "https://globalvision2000.com/forum/showthread.php?mode=linear&tid=536&pid=3735",
+        "flags": 2938,
+        "tokens": 53952
+      },
+      {
+        "url": "http://archive.legendsofglory.com/journal/journal3.htm",
+        "flags": 2817,
+        "tokens": 40274
+      },
+      {
+        "url": "https://softpanorama.org/Skeptics/Financial_skeptic/Bulletin/2009/financial_skeptic2009_06.shtml",
+        "flags": 2708,
+        "tokens": 55146
+      },
+      {
+        "url": "https://americanliterature.com/author/ivan-s-turgenev/short-story/the-inn/",
+        "flags": 2552,
+        "tokens": 40780
+      },
+      {
+        "url": "https://happytowander.com/funny-travel-stories/",
+        "flags": 2516,
+        "tokens": 34557
+      },
+      {
+        "url": "http://eissq.com/",
+        "flags": 2468,
+        "tokens": 47546
+      },
+      {
+        "url": "https://sovereignradio.com/house-of-the-dragon-ep-14-tmn-live-9-4-24-6-00-pm-est/",
+        "flags": 2404,
+        "tokens": 36115
+      },
+      {
+        "url": "http://staging.nlx.com/xtf/view?docId=chinese1/chinese1.06.xml;chunk.id=mozi.3;toc.id=mozi.3;brand=default",
+        "flags": 2389,
+        "tokens": 78671
+      },
+      {
+        "url": "https://www.thenightwatchman.org/news/news-and-commentary-for-april-2023",
+        "flags": 2295,
+        "tokens": 33602
+      },
+      {
+        "url": "https://www.linux-magazine.com/Online/Blogs/Off-the-Beat-Bruce-Byfield-s-Blog/Writing-about-FOSS-sexism",
+        "flags": 2224,
+        "tokens": 20945
+      },
+      {
+        "url": "https://lustria-online.com/threads/april-may-2016-short-story-contest-voting-thread.17857/",
+        "flags": 2214,
+        "tokens": 37243
+      },
+      {
+        "url": "https://gutenberg.org/cache/epub/55703/pg55703-images.html",
+        "flags": 2213,
+        "tokens": 50553
+      },
+      {
+        "url": "https://lemmy.jaypg.pw/post/596327?scrollToComments=true",
+        "flags": 2192,
+        "tokens": 15794
+      },
+      {
+        "url": "https://feeds.buzzsprout.com/2253662/episodes/14894341-22-false-light-new-age-programs-of-deception?t=0",
+        "flags": 2180,
+        "tokens": 31126
+      },
+      {
+        "url": "https://www.metaspoon.com/wd1-faulty-roomie/?fb=9047M1Pbr4565a0&utm_source=9047M1Pbr4565a0&pd=9&ep=ml",
+        "flags": 2173,
+        "tokens": 21586
+      },
+      {
+        "url": "https://ronnisanlo.com/this-day-in-lgbtq-history-august-2/",
+        "flags": 2169,
+        "tokens": 40721
+      },
+      {
+        "url": "http://www.gruntfreepress.com",
+        "flags": 2148,
+        "tokens": 28145
+      },
+      {
+        "url": "https://scienceblogs.com/gregladen/2015/03/12/lomborg-tells-bangladesh-not-to-worry-about-sea-level-rise",
+        "flags": 2120,
+        "tokens": 30681
+      },
+      {
+        "url": "https://veracityvoice.com/?tag=radiation",
+        "flags": 2080,
+        "tokens": 43043
+      },
+      {
+        "url": "https://gutenberg.org/cache/epub/55151/pg55151-images.html",
+        "flags": 2076,
+        "tokens": 44412
+      },
+      {
+        "url": "https://dreamhawk.com/body-and-mind/the-many-ways-to-a-new-life-2/",
+        "flags": 2039,
+        "tokens": 67202
+      },
+      {
+        "url": "https://silo.pub/the-disney-way.html",
+        "flags": 2012,
+        "tokens": 84955
+      }
+    ]
+  }
+}

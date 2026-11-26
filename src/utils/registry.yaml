@@ -125,6 +125,17 @@ models:
     kwargs:
       torch_dtype: bfloat16
 
+  # ToxinTrace (E2): pre-trained Pythia-410M, fine-tuned on FineWeb 2025 without and with the E2 mask
+  pythia-410m-pretrained:
+    path: EleutherAI/pythia-410m-deduped
+    family: pythia
+    tokenizer: pythia-tok
+    block_size: 2048
+    pretrained: True
+    num_layers: 24
+    kwargs:
+      torch_dtype: bfloat16
+
 tokenizers:
   pythia-tok:
     path: EleutherAI/pythia-70m-deduped   # HuggingFace Hub path

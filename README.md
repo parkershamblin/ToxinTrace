@@ -4,8 +4,9 @@ Course project for CAI 5307 (Natural Language Processing), University of South F
 Steven Abdalla, Pritkumar Pagda, Parker Shamblin.
 
 We reproduce the Pythia-160M results of [IF-Guide: Influence Function-Guided Detoxification of LLMs](https://arxiv.org/abs/2506.01790)
-(Coalson, Bae, Carlini and Hong, NeurIPS 2025) on one RTX 4090, and test whether a toxic-token mask
-still works after it is moved to a model with a different tokenizer.
+(Coalson, Bae, Carlini and Hong, NeurIPS 2025) on one RTX 4090. We then test whether a toxic-token mask
+still works after it is moved to a model with a different tokenizer (E1), and whether the same 2020 queries
+still find the tokens to penalize in a 2025 web corpus (E2, fine-tuning Pythia-410M).
 
 This repository is the authors' code ([ztcoalson/IF-Guide](https://github.com/ztcoalson/IF-Guide)) plus our own scripts.
 **Everything we wrote is in [`src/toxintrace/`](src/toxintrace)**; our changes to the authors' files are listed below.
@@ -42,7 +43,7 @@ Run the numbered scripts in order from `src/`. Each one prints its commands; set
 | `05_evaluate.sh` | R1 + R2: RTP, AttaQ, BOLD, implicit toxicity, fluency for 6 systems, then the tables | 16 h (RAD is 6 h per model) |
 | `06_bold_trailing_space.sh` | R2: BOLD without the trailing space of its prompts | 0.5 h |
 | `07_e1_gpt2_transfer.sh` | E1: mask moved to GPT-2's tokenizer, two fine-tunes, evaluation | 6 h |
-| `08_e2_fineweb.sh` | E2: FineWeb 2025 corpus, its toxicity rate against OpenWebText, EK-FAC scores, 2% mask and a first look at it (fine-tunes not done) | 6.5 h |
+| `08_e2_fineweb.sh` | E2: FineWeb 2025 corpus and its toxicity rate against OpenWebText, EK-FAC scores and 2% mask, Pythia-410M fine-tunes without and with the mask, evaluation of those and of stock Pythia-410M | 18 h |
 | `09_analysis.sh` | Bootstrap intervals, severity thresholds, BOLD first-word analysis, mask positions (CPU) | 5 min |
 
 ```bash
@@ -83,6 +84,14 @@ Checkpoints, the 1 GB mask and generated outputs are too large for GitHub and ar
 |---|---|---|
 | Detoxify, 10,000 random chunks each | 1.70% | 0.56% |
 
+| Pythia-410M, fine-tuned on 400M FineWeb tokens (E2) | EMT | TP | Perplexity (OWT) | Perplexity (FineWeb) |
+|---|---|---|---|---|
+| Stock, not fine-tuned | 0.615 | 0.624 | 15.81 | 18.83 |
+| Control | 0.565 | 0.571 | 16.60 | 16.47 |
+| Mask built on FineWeb | 0.159 | 0.119 | 16.92 | 16.63 |
+
+All E2 metrics are in [`results_toxintrace/e2_summary.csv`](results_toxintrace/e2_summary.csv) (made by `e2_summary.py`).
+
 ## Our code
 
 | File in `src/toxintrace/` | Purpose |
@@ -95,6 +104,7 @@ Checkpoints, the 1 GB mask and generated outputs are too large for GitHub and ar
 | `to_conv1d.py` | E1: converts fine-tuned GPT-2 checkpoints to a standard layout and verifies them |
 | `make_fineweb_subset.py`, `compare_toxicity.py`, `inspect_mask.py` | E2: FineWeb corpus in the same format as the OpenWebText chunks; Detoxify comparison; what the masks select |
 | `make_tables.py`, `analysis.py` | Tables, reduction factors, bootstrap intervals and diagnostics |
+| `e2_summary.py` | One table of every metric for a set of runs of one model, with reduction factors (E2; also reproduces the E1 table) |
 | `experiments/` | The numbered scripts above |
 
 Changes to the authors' files (`git diff main toxintrace`):
